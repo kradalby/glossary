@@ -2,7 +2,10 @@ module Glossary exposing (..)
 
 import Html exposing (..)
 import Html.Events exposing (..)
-import Html.Attributes exposing (..)
+import Html.Attributes exposing (type_, checked, name)
+import Http
+import Json.Decode exposing (Decoder, int, string, list)
+import Json.Decode.Pipeline exposing (decode, required)
 import List
 import List.Extra
 import Platform.Cmd exposing (Cmd)
@@ -45,6 +48,18 @@ type Language
     | Spanish
 
 
+type alias Book =
+    { title : String
+    , chapters : String
+    }
+
+
+type alias Chapter =
+    { chapter : Int
+    , words : String
+    }
+
+
 type alias Word =
     { english : String
     , spanish : String
@@ -53,6 +68,8 @@ type alias Word =
 
 type alias Model =
     { wordList : List Word
+    , bookList : List Book
+    , chapterList : List Chapter
     , currentWord : Word
     , unAnswered : List Word
     , correct : List Word
@@ -65,29 +82,35 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model
-        words
-        (case List.head words of
-            Nothing ->
-                { english = "", spanish = "" }
+    let
+        model =
+            { wordList = words
+            , bookList = []
+            , chapterList = []
+            , currentWord =
+                (case List.head words of
+                    Nothing ->
+                        { english = "", spanish = "" }
 
-            Just word ->
-                word
-        )
-        (case List.tail words of
-            Nothing ->
-                []
+                    Just word ->
+                        word
+                )
+            , unAnswered =
+                (case List.tail words of
+                    Nothing ->
+                        []
 
-            Just words ->
-                words
-        )
-        []
-        []
-        English
-        ""
-        False
-    , Cmd.none
-    )
+                    Just words ->
+                        words
+                )
+            , correct = []
+            , wrong = []
+            , language = English
+            , textInput = ""
+            , lazy = False
+            }
+    in
+        model ! [ getBooks ]
 
 
 type Msg
@@ -96,6 +119,12 @@ type Msg
     | Wrong
     | ChangeLanguage Language
     | ToggleLazy
+    | GetBooks
+    | NewBooks (Result Http.Error (List Book))
+    | GetChapters Book
+    | NewChapters (Result Http.Error (List Chapter))
+    | GetWords Chapter
+    | NewWords (Result Http.Error (List Word))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -152,6 +181,33 @@ update msg model =
             , Cmd.none
             )
 
+        GetBooks ->
+            ( model, getBooks )
+
+        NewBooks (Ok books) ->
+            ( { model | bookList = books }, Cmd.none )
+
+        NewBooks (Err _) ->
+            ( model, Cmd.none )
+
+        GetChapters book ->
+            ( model, getChapters book )
+
+        NewChapters (Ok chapters) ->
+            ( { model | chapterList = chapters }, Cmd.none )
+
+        NewChapters (Err _) ->
+            ( model, Cmd.none )
+
+        GetWords chapter ->
+            ( model, getWords chapter )
+
+        NewWords (Ok words) ->
+            ( { model | wordList = words }, Cmd.none )
+
+        NewWords (Err _) ->
+            ( model, Cmd.none )
+
 
 view : Model -> Html Msg
 view model =
@@ -196,16 +252,6 @@ viewLanguagePicker languages model =
         )
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
-
-
-findWord : String -> List Word -> Maybe Word
-findWord input wordList =
-    List.Extra.find (\word -> input == word.spanish || input == word.english) wordList
-
-
 checkInputWord : Model -> Msg
 checkInputWord model =
     let
@@ -239,6 +285,20 @@ radio labelName groupName isSelected msg =
         ]
 
 
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
+
+
+
+-- Utilities
+
+
+findWord : String -> List Word -> Maybe Word
+findWord input wordList =
+    List.Extra.find (\word -> input == word.spanish || input == word.english) wordList
+
+
 removeSpecialCharacters : String -> List SpecialCharacter -> String
 removeSpecialCharacters input list =
     case list of
@@ -247,3 +307,69 @@ removeSpecialCharacters input list =
 
         first :: rest ->
             removeSpecialCharacters (String.Extra.replace first.special first.latin input) rest
+
+
+
+-- Api stuff
+
+
+base_url : String
+base_url =
+    "/api"
+
+
+getBooks : Cmd Msg
+getBooks =
+    let
+        url =
+            base_url ++ "/book"
+
+        request =
+            Http.get url (list bookDecoder)
+    in
+        Http.send NewBooks request
+
+
+bookDecoder : Decoder Book
+bookDecoder =
+    decode Book
+        |> required "title" string
+        |> required "chapters" string
+
+
+getChapters : Book -> Cmd Msg
+getChapters book =
+    let
+        url =
+            base_url ++ book.chapters
+
+        request =
+            Http.get url (list chapterDecoder)
+    in
+        Http.send NewChapters request
+
+
+chapterDecoder : Decoder Chapter
+chapterDecoder =
+    decode Chapter
+        |> required "chapter" int
+        |> required "words" string
+
+
+getWords : Chapter -> Cmd Msg
+getWords chapter =
+    let
+        url =
+            base_url ++ chapter.words
+
+        request =
+            Http.get url (list wordDecoder)
+    in
+        Http.send NewWords request
+
+
+wordDecoder : Decoder Word
+wordDecoder =
+    decode Word
+        |> required "english" string
+        |> required "spanish" string
