@@ -1,0 +1,62 @@
+[
+    {
+        "english": "lawyer",
+        "spanish": "abogado"
+    },
+    {
+        "english": "alfabeto",
+        "spanish": "alphabet"
+    },
+    {
+        "english": "year",
+        "spanish": "año"
+    },
+    {
+        "english": "surname",
+        "spanish": "apellido"
+    },
+    {
+        "english": "architect",
+        "spanish": "arquitecto"
+    },
+    {
+        "english": "avenue",
+        "spanish": "avendia"
+    },
+    {
+        "english": "pen",
+        "spanish": "bolígrafo"
+    },
+    {
+        "english": "street",
+        "spanish": "calle"
+    },
+    {
+        "english": "postal code",
+        "spanish": "código postal"
+    },
+    {
+        "english": "email",
+        "spanish": "correo electrónico"
+    },
+    {
+        "english": "picture",
+        "spanish": "cuadro"
+    },
+    {
+        "english": "personal information",
+        "spanish": "datos personales"
+    },
+    {
+        "english": "professional data",
+        "spanish": "datos profesionales"
+    },
+    {
+        "english": "department",
+        "spanish": "departamento"
+    },
+    {
+        "english": "office",
+        "spanish": "despacho"
+    }
+]
