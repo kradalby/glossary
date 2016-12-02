@@ -2,7 +2,7 @@ module Glossary exposing (..)
 
 import Html exposing (..)
 import Html.Events exposing (..)
-import Html.Attributes exposing (type_, checked, name)
+import Html.Attributes exposing (type_, checked, name, disabled)
 import Http
 import Json.Decode exposing (Decoder, int, string, list)
 import Json.Decode.Pipeline exposing (decode, required)
@@ -22,9 +22,10 @@ main =
         }
 
 
-words : List Word
-words =
-    [ { english = "speak", spanish = "hablar" }, { english = "eat", spanish = "comer" } ]
+
+-- words : List Word
+-- words =
+--     [ { english = "speak", spanish = "hablar" }, { english = "eat", spanish = "comer" } ]
 
 
 type alias SpecialCharacter =
@@ -84,25 +85,11 @@ init : ( Model, Cmd Msg )
 init =
     let
         model =
-            { wordList = words
+            { wordList = []
             , bookList = []
             , chapterList = []
-            , currentWord =
-                (case List.head words of
-                    Nothing ->
-                        { english = "", spanish = "" }
-
-                    Just word ->
-                        word
-                )
-            , unAnswered =
-                (case List.tail words of
-                    Nothing ->
-                        []
-
-                    Just words ->
-                        words
-                )
+            , currentWord = { english = "", spanish = "" }
+            , unAnswered = []
             , correct = []
             , wrong = []
             , language = English
@@ -117,6 +104,7 @@ type Msg
     = Input String
     | Correct
     | Wrong
+    | NextWord
     | ChangeLanguage Language
     | ToggleLazy
     | GetBooks
@@ -140,46 +128,29 @@ update msg model =
             ( { model | lazy = not model.lazy }, Cmd.none )
 
         Correct ->
-            ( { model
-                | currentWord =
-                    case List.head model.unAnswered of
-                        Nothing ->
-                            { english = "", spanish = "" }
-
-                        Just head ->
-                            head
-                , unAnswered =
-                    case List.tail model.unAnswered of
-                        Nothing ->
-                            []
-
-                        Just tail ->
-                            tail
-                , correct = model.currentWord :: model.correct
-              }
-            , Cmd.none
-            )
+            let
+                nextWordModel =
+                    nextWord model
+            in
+                ( { nextWordModel
+                    | correct = model.currentWord :: model.correct
+                  }
+                , Cmd.none
+                )
 
         Wrong ->
-            ( { model
-                | currentWord =
-                    case List.head model.unAnswered of
-                        Nothing ->
-                            { english = "", spanish = "" }
+            let
+                nextWordModel =
+                    nextWord model
+            in
+                ( { nextWordModel
+                    | wrong = model.currentWord :: model.wrong
+                  }
+                , Cmd.none
+                )
 
-                        Just head ->
-                            head
-                , unAnswered =
-                    case List.tail model.unAnswered of
-                        Nothing ->
-                            []
-
-                        Just tail ->
-                            tail
-                , wrong = model.currentWord :: model.wrong
-              }
-            , Cmd.none
-            )
+        NextWord ->
+            ( (nextWord model), Cmd.none )
 
         GetBooks ->
             ( model, getBooks )
@@ -209,6 +180,31 @@ update msg model =
             ( model, Cmd.none )
 
 
+nextWord : Model -> Model
+nextWord model =
+    { model
+        | currentWord =
+            case List.head model.unAnswered of
+                Nothing ->
+                    { english = "", spanish = "" }
+
+                Just head ->
+                    head
+        , unAnswered =
+            case List.tail model.unAnswered of
+                Nothing ->
+                    []
+
+                Just tail ->
+                    tail
+    }
+
+
+isEmptyWord : Word -> Bool
+isEmptyWord word =
+    word == { english = "", spanish = "" }
+
+
 view : Model -> Html Msg
 view model =
     div []
@@ -216,7 +212,7 @@ view model =
         , h3 [] [ text ("Translate from: " ++ (toString model.language)) ]
         , h4 [] [ text ("Word: " ++ (viewWord model)) ]
         , input [ onInput Input ] []
-        , button [ onClick (checkInputWord model) ] [ text "Submit" ]
+        , button [ onClick (checkInputWord model), (disabled (isEmptyWord model.currentWord)) ] [ text "Submit" ]
         , div []
             [ h4 [] [ text "Change language to translate from:" ]
             , viewLanguagePicker
@@ -227,7 +223,49 @@ view model =
             , label [] [ input [ type_ "checkbox", onClick (ToggleLazy) ] [] ]
             , text "Lazy"
             ]
+        , viewBooks model.bookList
+        , viewChapters model.chapterList
         , h4 [] [ text (removeSpecialCharacters model.textInput spanishSpecialCharacters) ]
+        ]
+
+
+viewBooks : List Book -> Html Msg
+viewBooks books =
+    case List.length books of
+        0 ->
+            div [] [ h3 [] [ text "No books available" ] ]
+
+        _ ->
+            div []
+                [ h3 [] [ text "Select book: " ]
+                , div [] (List.map (\book -> viewBook book) books)
+                ]
+
+
+viewBook : Book -> Html Msg
+viewBook book =
+    div [ onClick (GetChapters book) ]
+        [ h4 [] [ text book.title ]
+        ]
+
+
+viewChapters : List Chapter -> Html Msg
+viewChapters chapters =
+    case List.length chapters of
+        0 ->
+            div [] [ h3 [] [ text "No book has been selected" ] ]
+
+        _ ->
+            div []
+                [ h3 [] [ text "Select chapter: " ]
+                , div [] (List.map (\chapter -> viewChapter chapter) chapters)
+                ]
+
+
+viewChapter : Chapter -> Html Msg
+viewChapter chapter =
+    div [ onClick (GetWords chapter) ]
+        [ h4 [] [ text (toString chapter.chapter) ]
         ]
 
 
@@ -318,11 +356,16 @@ base_url =
     "/api"
 
 
+createApiUrl : String -> String
+createApiUrl endpoint =
+    base_url ++ endpoint ++ ".json"
+
+
 getBooks : Cmd Msg
 getBooks =
     let
         url =
-            base_url ++ "/book"
+            createApiUrl "/book"
 
         request =
             Http.get url (list bookDecoder)
@@ -341,7 +384,7 @@ getChapters : Book -> Cmd Msg
 getChapters book =
     let
         url =
-            base_url ++ book.chapters
+            createApiUrl book.chapters
 
         request =
             Http.get url (list chapterDecoder)
@@ -360,7 +403,7 @@ getWords : Chapter -> Cmd Msg
 getWords chapter =
     let
         url =
-            base_url ++ chapter.words
+            createApiUrl chapter.words
 
         request =
             Http.get url (list wordDecoder)
