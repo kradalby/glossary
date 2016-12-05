@@ -2,7 +2,7 @@ module Glossary exposing (..)
 
 import Html exposing (..)
 import Html.Events exposing (..)
-import Html.Attributes exposing (type_, checked, name, disabled)
+import Html.Attributes exposing (type_, checked, name, disabled, value)
 import Http
 import Json.Decode exposing (Decoder, int, string, list)
 import Json.Decode.Pipeline exposing (decode, required)
@@ -134,6 +134,7 @@ update msg model =
             in
                 ( { nextWordModel
                     | correct = model.currentWord :: model.correct
+                    , textInput = ""
                   }
                 , Cmd.none
                 )
@@ -174,7 +175,7 @@ update msg model =
             ( model, getWords chapter )
 
         NewWords (Ok words) ->
-            ( { model | wordList = words }, Cmd.none )
+            ( (nextWord { model | wordList = words, unAnswered = words }), Cmd.none )
 
         NewWords (Err _) ->
             ( model, Cmd.none )
@@ -204,6 +205,8 @@ isEmptyWord : Word -> Bool
 isEmptyWord word =
     word == { english = "", spanish = "" }
 
+onInputHandler :
+
 
 view : Model -> Html Msg
 view model =
@@ -211,7 +214,7 @@ view model =
         [ h2 [] [ text "Write the correct translation (Spanish <-> English)" ]
         , h3 [] [ text ("Translate from: " ++ (toString model.language)) ]
         , h4 [] [ text ("Word: " ++ (viewWord model)) ]
-        , input [ onInput Input ] []
+        , input [ onInput Input, value model.textInput, onSubmit (checkInputWord model) ] []
         , button [ onClick (checkInputWord model), (disabled (isEmptyWord model.currentWord)) ] [ text "Submit" ]
         , div []
             [ h4 [] [ text "Change language to translate from:" ]
