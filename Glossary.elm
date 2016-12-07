@@ -11,7 +11,6 @@ import List.Extra
 import Platform.Cmd exposing (Cmd)
 import String
 import String.Extra
-import Debug
 
 
 main =
@@ -45,9 +44,24 @@ spanishSpecialCharacters =
     ]
 
 
+norwegianSpecialCharacters : List SpecialCharacter
+norwegianSpecialCharacters =
+    [ { special = "æ", latin = "ae" }
+    , { special = "ø", latin = "oe" }
+    , { special = "å", latin = "aa" }
+    , { special = "é", latin = "e" }
+    ]
+
+
 type Language
     = English
     | Spanish
+    | Norwegian
+
+
+availableLanguages : List Language
+availableLanguages =
+    [ English, Spanish, Norwegian ]
 
 
 type alias Book =
@@ -65,6 +79,7 @@ type alias Chapter =
 type alias Word =
     { english : String
     , spanish : String
+    , norwegian : String
     }
 
 
@@ -83,6 +98,11 @@ type alias Model =
     }
 
 
+emptyWord : Word
+emptyWord =
+    { english = "", spanish = "", norwegian = "" }
+
+
 init : ( Model, Cmd Msg )
 init =
     let
@@ -90,7 +110,7 @@ init =
             { wordList = []
             , bookList = []
             , chapterList = []
-            , currentWord = { english = "", spanish = "" }
+            , currentWord = emptyWord
             , unAnswered = []
             , correct = []
             , wrong = []
@@ -195,7 +215,7 @@ nextWord model =
         | currentWord =
             case List.head model.unAnswered of
                 Nothing ->
-                    { english = "", spanish = "" }
+                    emptyWord
 
                 Just head ->
                     head
@@ -211,7 +231,7 @@ nextWord model =
 
 isEmptyWord : Word -> Bool
 isEmptyWord word =
-    word == { english = "", spanish = "" }
+    word == emptyWord
 
 
 onEnter : Msg -> Attribute Msg
@@ -237,15 +257,11 @@ view model =
         , div []
             [ h4 [] [ text "Change language to translate from:" ]
             , viewFromLanguagePicker
-                [ English
-                , Spanish
-                ]
+                availableLanguages
                 model.fromLanguage
             , h4 [] [ text "Change language to translate to:" ]
             , viewToLanguagePicker
-                [ English
-                , Spanish
-                ]
+                availableLanguages
                 model.toLanguage
             , label [] [ input [ type_ "checkbox", onClick (ToggleLazy), checked model.lazy ] [] ]
             , text "Lazy"
@@ -305,6 +321,9 @@ getSpecialCharactersByLanguage language =
         Spanish ->
             spanishSpecialCharacters
 
+        Norwegian ->
+            norwegianSpecialCharacters
+
 
 getSpecialCharactersFromModel : Model -> List SpecialCharacter
 getSpecialCharactersFromModel model =
@@ -319,6 +338,9 @@ getWordByLanguage language word =
 
         Spanish ->
             word.spanish
+
+        Norwegian ->
+            word.norwegian
 
 
 fromWord : Model -> String
@@ -487,3 +509,4 @@ wordDecoder =
     decode Word
         |> required "english" string
         |> required "spanish" string
+        |> required "norwegian" string
