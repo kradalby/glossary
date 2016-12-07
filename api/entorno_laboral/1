@@ -1,62 +1,77 @@
 [
     {
         "english": "lawyer",
+        "norwegian": "advokat",
         "spanish": "abogado"
     },
     {
         "english": "alphabet",
+        "norwegian": "alfabet",
         "spanish": "alfabeto"
     },
     {
         "english": "year",
+        "norwegian": "år",
         "spanish": "año"
     },
     {
         "english": "surname",
+        "norwegian": "etternavn",
         "spanish": "apellido"
     },
     {
         "english": "architect",
+        "norwegian": "arkitekt",
         "spanish": "arquitecto"
     },
     {
         "english": "avenue",
+        "norwegian": "allé",
         "spanish": "avendia"
     },
     {
         "english": "pen",
+        "norwegian": "pen",
         "spanish": "bolígrafo"
     },
     {
         "english": "street",
+        "norwegian": "vei",
         "spanish": "calle"
     },
     {
         "english": "postal code",
+        "norwegian": "postkode",
         "spanish": "código postal"
     },
     {
         "english": "email",
+        "norwegian": "epost",
         "spanish": "correo electrónico"
     },
     {
         "english": "picture",
+        "norwegian": "bilde",
         "spanish": "cuadro"
     },
     {
         "english": "personal information",
+        "norwegian": "personlig informasjon",
         "spanish": "datos personales"
     },
     {
         "english": "professional data",
+        "norwegian": "profesjonell data",
         "spanish": "datos profesionales"
     },
     {
         "english": "department",
+        "norwegian": "avdeling",
         "spanish": "departamento"
     },
     {
         "english": "office",
+        "norwegian": "kontor",
         "spanish": "despacho"
     }
 ]
