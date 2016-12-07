@@ -205,7 +205,20 @@ isEmptyWord : Word -> Bool
 isEmptyWord word =
     word == { english = "", spanish = "" }
 
-onInputHandler :
+
+onEnterPressed : msg -> Attribute msg
+onEnterPressed msg =
+    let
+        isEnter code =
+            if code == 13 then
+                Ok ()
+            else
+                Err ""
+
+        decodeEnterKeyCode =
+            Json.customDecoder keyCode isEnter
+    in
+        on "keydown" <| Json.Decode.map (\_ -> msg) decodeEnterKeyCode
 
 
 view : Model -> Html Msg
