@@ -22,12 +22,6 @@ main =
         }
 
 
-
--- words : List Word
--- words =
---     [ { english = "speak", spanish = "hablar" }, { english = "eat", spanish = "comer" } ]
-
-
 type alias SpecialCharacter =
     { latin : String, special : String }
 
