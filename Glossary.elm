@@ -11,6 +11,7 @@ import List.Extra
 import Platform.Cmd exposing (Cmd)
 import String
 import String.Extra
+import Debug
 
 
 main =
@@ -75,7 +76,8 @@ type alias Model =
     , unAnswered : List Word
     , correct : List Word
     , wrong : List Word
-    , language : Language
+    , fromLanguage : Language
+    , toLanguage : Language
     , textInput : String
     , lazy : Bool
     }
@@ -92,7 +94,8 @@ init =
             , unAnswered = []
             , correct = []
             , wrong = []
-            , language = English
+            , fromLanguage = English
+            , toLanguage = Spanish
             , textInput = ""
             , lazy = False
             }
@@ -105,7 +108,8 @@ type Msg
     | Correct
     | Wrong
     | NextWord
-    | ChangeLanguage Language
+    | ChangeFromLanguage Language
+    | ChangeToLanguage Language
     | ToggleLazy
     | GetBooks
     | NewBooks (Result Http.Error (List Book))
@@ -121,8 +125,11 @@ update msg model =
         Input newInput ->
             ( { model | textInput = newInput }, Cmd.none )
 
-        ChangeLanguage newLanguage ->
-            ( { model | language = newLanguage }, Cmd.none )
+        ChangeFromLanguage newFromLanguage ->
+            ( { model | fromLanguage = newFromLanguage }, Cmd.none )
+
+        ChangeToLanguage newToLanguage ->
+            ( { model | toLanguage = newToLanguage }, Cmd.none )
 
         ToggleLazy ->
             ( { model | lazy = not model.lazy }, Cmd.none )
@@ -146,6 +153,7 @@ update msg model =
             in
                 ( { nextWordModel
                     | wrong = model.currentWord :: model.wrong
+                    , textInput = ""
                   }
                 , Cmd.none
                 )
@@ -206,37 +214,40 @@ isEmptyWord word =
     word == { english = "", spanish = "" }
 
 
-onEnterPressed : msg -> Attribute msg
-onEnterPressed msg =
+onEnter : Msg -> Attribute Msg
+onEnter msg =
     let
         isEnter code =
             if code == 13 then
-                Ok ()
+                Json.Decode.succeed msg
             else
-                Err ""
-
-        decodeEnterKeyCode =
-            Json.customDecoder keyCode isEnter
+                Json.Decode.fail "not ENTER"
     in
-        on "keydown" <| Json.Decode.map (\_ -> msg) decodeEnterKeyCode
+        on "keydown" (Json.Decode.andThen isEnter keyCode)
 
 
 view : Model -> Html Msg
 view model =
     div []
         [ h2 [] [ text "Write the correct translation (Spanish <-> English)" ]
-        , h3 [] [ text ("Translate from: " ++ (toString model.language)) ]
-        , h4 [] [ text ("Word: " ++ (viewWord model)) ]
-        , input [ onInput Input, value model.textInput, onSubmit (checkInputWord model) ] []
-        , button [ onClick (checkInputWord model), (disabled (isEmptyWord model.currentWord)) ] [ text "Submit" ]
+        , h3 [] [ text ("Translate from: " ++ (toString model.fromLanguage)) ]
+        , h3 [] [ text ("Translate to: " ++ (toString model.toLanguage)) ]
+        , h4 [] [ text ("Word: " ++ (fromWord model)) ]
+        , input [ onInput Input, value model.textInput, onEnter (checkInputWord model), (disabled (isEmptyWord model.currentWord)) ] []
         , div []
             [ h4 [] [ text "Change language to translate from:" ]
-            , viewLanguagePicker
+            , viewFromLanguagePicker
                 [ English
                 , Spanish
                 ]
-                model
-            , label [] [ input [ type_ "checkbox", onClick (ToggleLazy) ] [] ]
+                model.fromLanguage
+            , h4 [] [ text "Change language to translate to:" ]
+            , viewToLanguagePicker
+                [ English
+                , Spanish
+                ]
+                model.toLanguage
+            , label [] [ input [ type_ "checkbox", onClick (ToggleLazy), checked model.lazy ] [] ]
             , text "Lazy"
             ]
         , viewBooks model.bookList
@@ -285,22 +296,58 @@ viewChapter chapter =
         ]
 
 
-viewWord : Model -> String
-viewWord model =
-    case model.language of
+getSpecialCharactersByLanguage : Language -> List SpecialCharacter
+getSpecialCharactersByLanguage language =
+    case language of
         English ->
-            model.currentWord.english
+            []
 
         Spanish ->
-            model.currentWord.spanish
+            spanishSpecialCharacters
 
 
-viewLanguagePicker : List Language -> Model -> Html Msg
-viewLanguagePicker languages model =
+getSpecialCharactersFromModel : Model -> List SpecialCharacter
+getSpecialCharactersFromModel model =
+    getSpecialCharactersByLanguage model.toLanguage
+
+
+getWordByLanguage : Language -> Word -> String
+getWordByLanguage language word =
+    case language of
+        English ->
+            word.english
+
+        Spanish ->
+            word.spanish
+
+
+fromWord : Model -> String
+fromWord model =
+    getWordByLanguage model.fromLanguage model.currentWord
+
+
+toWord : Model -> String
+toWord model =
+    getWordByLanguage model.toLanguage model.currentWord
+
+
+viewFromLanguagePicker : List Language -> Language -> Html Msg
+viewFromLanguagePicker languages language =
     fieldset []
         (List.map
-            (\l ->
-                radio (toString l) "languagePicker" (l == model.language) (ChangeLanguage l)
+            (\lang ->
+                radio (toString lang) ("picker" ++ toString ChangeFromLanguage) (lang == language) (ChangeFromLanguage lang)
+            )
+            languages
+        )
+
+
+viewToLanguagePicker : List Language -> Language -> Html Msg
+viewToLanguagePicker languages language =
+    fieldset []
+        (List.map
+            (\lang ->
+                radio (toString lang) ("picker" ++ toString ChangeToLanguage) (lang == language) (ChangeToLanguage lang)
             )
             languages
         )
@@ -309,26 +356,34 @@ viewLanguagePicker languages model =
 checkInputWord : Model -> Msg
 checkInputWord model =
     let
-        word =
-            findWord model.textInput model.wordList
+        correctWord =
+            toWord model
+
+        inputWord =
+            String.toLower model.textInput
     in
-        case word of
-            Nothing ->
-                Wrong
+        case model.lazy of
+            False ->
+                if correctWord == inputWord then
+                    Correct
+                else
+                    Wrong
 
-            Just word ->
-                case model.language of
-                    English ->
-                        if (String.toLower model.textInput) == word.spanish then
-                            Correct
-                        else
-                            Wrong
+            True ->
+                let
+                    specialCharacters =
+                        getSpecialCharactersFromModel model
 
-                    Spanish ->
-                        if (String.toLower model.textInput) == word.english then
-                            Correct
-                        else
-                            Wrong
+                    correctWordWithoutSpecial =
+                        removeSpecialCharacters correctWord specialCharacters
+
+                    inputWordWithoutSpecial =
+                        removeSpecialCharacters inputWord specialCharacters
+                in
+                    if correctWordWithoutSpecial == inputWordWithoutSpecial then
+                        Correct
+                    else
+                        Wrong
 
 
 radio : String -> String -> Bool -> Msg -> Html Msg
