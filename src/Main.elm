@@ -1,4 +1,4 @@
-module Glossary exposing (..)
+module Main exposing (..)
 
 import Html exposing (..)
 import Html.Events exposing (..)
@@ -13,6 +13,7 @@ import String
 import String.Extra
 
 
+main : Program Never Model Msg
 main =
     Html.program
         { init = init
@@ -248,6 +249,7 @@ view model =
         , h3 [] [ text ("Translate to: " ++ (toString model.toLanguage)) ]
         , h4 [] [ text ("Word: " ++ (fromWord model)) ]
         , input [ onInput Input, value model.textInput, onEnter (checkInputWord model), (disabled (isEmptyWord model.currentWord)) ] []
+        , viewSessionInformation model
         , div []
             [ h4 [] [ text "Change language to translate from:" ]
             , viewFromLanguagePicker
@@ -263,6 +265,16 @@ view model =
         , viewBooks model.bookList
         , viewChapters model.chapterList
         , h4 [] [ text (removeSpecialCharacters model.textInput spanishSpecialCharacters) ]
+        ]
+
+
+viewSessionInformation : Model -> Html Msg
+viewSessionInformation model =
+    div []
+        [ h4 [] [ text ("Correct: " ++ (toString (List.length model.correct))) ]
+        , h4 [] [ text ("Wrong: " ++ (toString (List.length model.wrong))) ]
+        , h4 [] [ text ("Left: " ++ (toString (List.length model.unAnswered))) ]
+        , h4 [] [ text ("Total: " ++ (toString (List.length model.wordList))) ]
         ]
 
 
