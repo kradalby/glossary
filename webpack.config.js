@@ -1,4 +1,6 @@
-var path = require('path');
+const path = require('path');
+const webpack = require('webpack');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: {
@@ -42,6 +44,17 @@ module.exports = {
 
     noParse: /\.elm$/
   },
+
+  plugins: [
+    new CopyWebpackPlugin([
+        { from: 'api', to: 'api' },
+    ]),
+    new webpack.optimize.UglifyJsPlugin({
+        compress: {
+            warnings: false,
+        },
+    })
+  ],
 
   devServer: {
     inline: true,
