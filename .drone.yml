@@ -3,6 +3,7 @@ build:
   pull: true
   commands:
     - npm prune
+    - npm install -g --silent elm
     - npm install --silent
     - npm run build
 
