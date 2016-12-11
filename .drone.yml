@@ -1,0 +1,37 @@
+build:
+  image: node:7.2.1
+  pull: true
+  commands:
+    - npm prune
+    - npm install --silent
+    - npm run build
+
+notify:
+  email:
+    from: drone@fap.no
+    host: mail.ntnu.fap.no
+    port: 25
+    recipients:
+      - kradalby@kradalby.no
+    when:
+        branch: master
+
+cache:
+  mount:
+    - node_modules
+    - .git
+
+deploy:
+  rsync:
+    user: www
+    host: seel.terra.fap.no
+    port: 22
+    source: dist/
+    target: /usr/local/www/glossary.kradalby.no/
+    delete: true
+    recursive: true
+    exclude:
+    when:
+        branch: master
+    commands:
+      - echo "Done"
