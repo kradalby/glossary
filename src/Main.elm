@@ -2,8 +2,9 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Events exposing (..)
-import Html.Attributes exposing (type_, checked, name, disabled, value)
+import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected)
 import Http
+import Json.Encode
 import Json.Decode exposing (Decoder, int, string, list)
 import Json.Decode.Pipeline exposing (decode, required)
 import List
@@ -11,6 +12,8 @@ import List.Extra
 import Platform.Cmd exposing (Cmd)
 import String
 import String.Extra
+import Dom
+import Task
 
 
 main : Program Never Model Msg
@@ -119,7 +122,8 @@ init =
 
 
 type Msg
-    = Input String
+    = NoOp
+    | Input String
     | Correct
     | Wrong
     | NextWord
@@ -137,6 +141,9 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        NoOp ->
+            ( model, Cmd.none )
+
         Input newInput ->
             ( { model | textInput = newInput }, Cmd.none )
 
@@ -241,30 +248,64 @@ onEnter msg =
         on "keydown" (Json.Decode.andThen isEnter keyCode)
 
 
+targetValueLanguageDecoder : Json.Decode.Decoder Language
+targetValueLanguageDecoder =
+    Html.Events.targetValue
+        |> Json.Decode.andThen
+            (\val ->
+                case val of
+                    "English" ->
+                        Json.Decode.succeed English
+
+                    "Spanish" ->
+                        Json.Decode.succeed Spanish
+
+                    "Norwegian" ->
+                        Json.Decode.succeed Norwegian
+
+                    _ ->
+                        Json.Decode.fail ("Invalid Role: " ++ val)
+            )
+
+
 view : Model -> Html Msg
 view model =
-    div []
-        [ h2 [] [ text "Write the correct translation (Spanish <-> English)" ]
-        , h3 [] [ text ("Translate from: " ++ (toString model.fromLanguage)) ]
-        , h3 [] [ text ("Translate to: " ++ (toString model.toLanguage)) ]
-        , h4 [] [ text ("Word: " ++ (fromWord model)) ]
-        , input [ onInput Input, value model.textInput, onEnter (checkInputWord model), (disabled (isEmptyWord model.currentWord)) ] []
-        , viewSessionInformation model
-        , div []
-            [ h4 [] [ text "Change language to translate from:" ]
-            , viewFromLanguagePicker
-                availableLanguages
-                model.fromLanguage
-            , h4 [] [ text "Change language to translate to:" ]
-            , viewToLanguagePicker
-                availableLanguages
-                model.toLanguage
-            , label [] [ input [ type_ "checkbox", onClick (ToggleLazy), checked model.lazy ] [] ]
-            , text "Lazy"
+    div [ class "container" ]
+        [ div [ class "logo" ] [ img [ src "assets/glossary_logo.svg" ] [] ]
+        , div [ class "language" ]
+            [ select [ name "fromLanguage", on "change" (Json.Decode.map ChangeFromLanguage targetValueLanguageDecoder) ]
+                (List.map
+                    (\language -> languageOption (toString language) (language == model.fromLanguage))
+                    availableLanguages
+                )
+            , select [ name "toLanguage", on "change" (Json.Decode.map ChangeToLanguage targetValueLanguageDecoder) ]
+                (List.map
+                    (\language -> languageOption (toString language) (language == model.toLanguage))
+                    availableLanguages
+                )
             ]
-        , viewBooks model.bookList
-        , viewChapters model.chapterList
-        , h4 [] [ text (removeSpecialCharacters model.textInput spanishSpecialCharacters) ]
+        , div [ class "translate" ]
+            [ h4 [] [ text (fromWord model) ]
+            , input
+                [ id "wordInput"
+                , onInput Input
+                , value model.textInput
+                , case (isEmptyWord model.currentWord) of
+                    False ->
+                        onEnter (checkInputWord model)
+
+                    True ->
+                        disabled True
+                ]
+                []
+            , label [] [ text "Lazy", input [ type_ "checkbox", onClick (ToggleLazy), checked model.lazy ] [] ]
+            ]
+        , div [ class "stats" ]
+            [ viewSessionInformation model ]
+        , div [ class "books" ]
+            [ viewBooks model.bookList ]
+        , div [ class "chapters" ]
+            [ viewChapters model.chapterList ]
         ]
 
 
@@ -412,6 +453,11 @@ checkInputWord model =
                         Correct
                     else
                         Wrong
+
+
+languageOption : String -> Bool -> Html Msg
+languageOption language isSelected =
+    option [ value language, selected isSelected ] [ text language ]
 
 
 radio : String -> String -> Bool -> Msg -> Html Msg
