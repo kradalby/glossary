@@ -1,3 +1,4 @@
+require('./styles/reset.css');
 require('./styles/main.css');
 require('./index.html');
 
