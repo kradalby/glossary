@@ -23,14 +23,14 @@ module.exports = {
         ]
       },
       {
-        test:    /\.html$/,
+        test: /\.html$/,
         exclude: /node_modules/,
-        loader:  'file-loader?name=[name].[ext]'
+        loader: 'file-loader?name=[name].[ext]'
       },
       {
-        test:    /\.elm$/,
+        test: /\.elm$/,
         exclude: [/elm-stuff/, /node_modules/],
-        loader:  'elm-webpack-loader'
+        loader: 'elm-webpack-loader'
       },
       {
         test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
@@ -47,12 +47,13 @@ module.exports = {
 
   plugins: [
     new CopyWebpackPlugin([
-        { from: 'api', to: 'api' },
+      { from: 'api', to: 'api' },
+      { from: 'src/assets', to: 'assets' },
     ]),
     new webpack.optimize.UglifyJsPlugin({
-        compress: {
-            warnings: false,
-        },
+      compress: {
+        warnings: false,
+      },
     })
   ],
 
