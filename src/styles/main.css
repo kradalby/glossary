@@ -3,43 +3,46 @@ body {
   font-family: 'Open Sans', sans-serif;
   font-weight: 300;
   line-height: 1.625;
+  background-color: #f1f1f1;
 }
 
 img {
   height: 100%;
 }
 
-.logo .language .translate .stats .books .chapters {
+.container {
+  display: block;
+  width: 960px;
+  margin: 0 auto;
+}
+
+.row {
   margin: 0;
   padding: 0;
   width: 100%;
 }
 
-.logo {
-  background-color: #fff;
-  height: 100px;
-  padding: 10px;
+.row-white {
+  background-color: #ffffff;
 }
 
-.language {
+.row-yellow {
   background-color: #fdf23e;
-  height: 50px;
 }
 
-.translate {
+.row-green {
   background-color: #2fce03;
-  height: 200px;
 }
 
-.stats {
+.row-orange {
   background-color: #ffbf35;
 }
 
-.books {
+.row-light-pink {
   background-color: #fa80a7;
 }
 
-.chapters {
+.row-pink {
   background-color: #ff3d84;
 }
 

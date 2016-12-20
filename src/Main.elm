@@ -271,40 +271,44 @@ targetValueLanguageDecoder =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ div [ class "logo" ] [ img [ src "assets/glossary_logo.svg" ] [] ]
-        , div [ class "language" ]
-            [ select [ name "fromLanguage", on "change" (Json.Decode.map ChangeFromLanguage targetValueLanguageDecoder) ]
-                (List.map
-                    (\language -> languageOption (toString language) (language == model.fromLanguage))
-                    availableLanguages
-                )
-            , select [ name "toLanguage", on "change" (Json.Decode.map ChangeToLanguage targetValueLanguageDecoder) ]
-                (List.map
-                    (\language -> languageOption (toString language) (language == model.toLanguage))
-                    availableLanguages
-                )
-            ]
-        , div [ class "translate" ]
-            [ h4 [] [ text (fromWord model) ]
-            , input
-                [ id "wordInput"
-                , onInput Input
-                , value model.textInput
-                , case (isEmptyWord model.currentWord) of
-                    False ->
-                        onEnter (checkInputWord model)
-
-                    True ->
-                        disabled True
+        [ div [ class "row row-white" ] [ div [ id "logo" ] [ img [ src "assets/glossary_logo.svg" ] [] ] ]
+        , div [ class "row row-yellow" ]
+            [ div [ id "language" ]
+                [ select [ name "fromLanguage", on "change" (Json.Decode.map ChangeFromLanguage targetValueLanguageDecoder) ]
+                    (List.map
+                        (\language -> languageOption (toString language) (language == model.fromLanguage))
+                        availableLanguages
+                    )
+                , select [ name "toLanguage", on "change" (Json.Decode.map ChangeToLanguage targetValueLanguageDecoder) ]
+                    (List.map
+                        (\language -> languageOption (toString language) (language == model.toLanguage))
+                        availableLanguages
+                    )
                 ]
-                []
-            , label [] [ text "Lazy", input [ type_ "checkbox", onClick (ToggleLazy), checked model.lazy ] [] ]
             ]
-        , div [ class "stats" ]
+        , div [ class "row row-green" ]
+            [ div [ id "translate" ]
+                [ h4 [] [ text (fromWord model) ]
+                , input
+                    [ id "wordInput"
+                    , onInput Input
+                    , value model.textInput
+                    , case (isEmptyWord model.currentWord) of
+                        False ->
+                            onEnter (checkInputWord model)
+
+                        True ->
+                            disabled True
+                    ]
+                    []
+                , label [] [ text "Lazy", input [ type_ "checkbox", onClick (ToggleLazy), checked model.lazy ] [] ]
+                ]
+            ]
+        , div [ class "row row-orange" ]
             [ viewSessionInformation model ]
-        , div [ class "books" ]
+        , div [ class "row row-light-pink" ]
             [ viewBooks model.bookList ]
-        , div [ class "chapters" ]
+        , div [ class "row row-pink" ]
             [ viewChapters model.chapterList ]
         ]
 
@@ -321,40 +325,44 @@ viewSessionInformation model =
 
 viewBooks : List Book -> Html Msg
 viewBooks books =
-    case List.length books of
-        0 ->
-            div [] [ h3 [] [ text "No books available" ] ]
+    div [ id "books" ]
+        [ case List.length books of
+            0 ->
+                div [] [ h3 [] [ text "No books available" ] ]
 
-        _ ->
-            div []
-                [ h3 [] [ text "Select book: " ]
-                , div [] (List.map (\book -> viewBook book) books)
-                ]
+            _ ->
+                div []
+                    [ h3 [] [ text "Select book: " ]
+                    , div [] (List.map (\book -> viewBook book) books)
+                    ]
+        ]
 
 
 viewBook : Book -> Html Msg
 viewBook book =
-    div [ onClick (GetChapters book) ]
+    div [ class "book", onClick (GetChapters book) ]
         [ h4 [] [ text book.title ]
         ]
 
 
 viewChapters : List Chapter -> Html Msg
 viewChapters chapters =
-    case List.length chapters of
-        0 ->
-            div [] [ h3 [] [ text "No book has been selected" ] ]
+    div [ id "chapters" ]
+        [ case List.length chapters of
+            0 ->
+                div [] [ h3 [] [ text "No book has been selected" ] ]
 
-        _ ->
-            div []
-                [ h3 [] [ text "Select chapter: " ]
-                , div [] (List.map (\chapter -> viewChapter chapter) chapters)
-                ]
+            _ ->
+                div []
+                    [ h3 [] [ text "Select chapter: " ]
+                    , div [] (List.map (\chapter -> viewChapter chapter) chapters)
+                    ]
+        ]
 
 
 viewChapter : Chapter -> Html Msg
 viewChapter chapter =
-    div [ onClick (GetWords chapter) ]
+    div [ class "chapter", onClick (GetWords chapter) ]
         [ h4 [] [ text (toString chapter.chapter) ]
         ]
 
