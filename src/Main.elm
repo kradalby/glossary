@@ -408,28 +408,6 @@ toWord model =
     getWordByLanguage model.toLanguage model.currentWord
 
 
-viewFromLanguagePicker : List Language -> Language -> Html Msg
-viewFromLanguagePicker languages language =
-    fieldset []
-        (List.map
-            (\lang ->
-                radio (toString lang) ("picker" ++ toString ChangeFromLanguage) (lang == language) (ChangeFromLanguage lang)
-            )
-            languages
-        )
-
-
-viewToLanguagePicker : List Language -> Language -> Html Msg
-viewToLanguagePicker languages language =
-    fieldset []
-        (List.map
-            (\lang ->
-                radio (toString lang) ("picker" ++ toString ChangeToLanguage) (lang == language) (ChangeToLanguage lang)
-            )
-            languages
-        )
-
-
 checkInputWord : Model -> Msg
 checkInputWord model =
     let
