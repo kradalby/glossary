@@ -279,6 +279,7 @@ view model =
                         (\language -> languageOption (toString language) (language == model.fromLanguage))
                         availableLanguages
                     )
+                , i [ class "fa fa-long-arrow-right fa-2" ] []
                 , select [ name "toLanguage", on "change" (Json.Decode.map ChangeToLanguage targetValueLanguageDecoder) ]
                     (List.map
                         (\language -> languageOption (toString language) (language == model.toLanguage))
@@ -315,7 +316,7 @@ view model =
 
 viewSessionInformation : Model -> Html Msg
 viewSessionInformation model =
-    div []
+    div [ id "stats" ]
         [ h4 [] [ text ("Correct: " ++ (toString (List.length model.correct))) ]
         , h4 [] [ text ("Wrong: " ++ (toString (List.length model.wrong))) ]
         , h4 [] [ text ("Left: " ++ (toString (List.length model.unAnswered))) ]

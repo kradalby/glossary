@@ -10,9 +10,24 @@ img {
   height: 100%;
 }
 
+select {
+  margin-top: 17px;
+  background: transparent;
+  width: 150px;
+  padding: 5px 35px 5px 5px;
+  font-size: 16px;
+  border: none;
+  border-bottom: 1px solid #444;
+  border-radius: 0px;
+  height: 34px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: url(arrowdown.svg) 96% / 15% no-repeat #fdf23e;
+}
+
 .container {
-  display: block;
-  width: 960px;
+  max-width: 960px;
   margin: 0 auto;
 }
 
@@ -48,4 +63,53 @@ img {
 
 footer {
   background-color: #f1f1f1;
+}
+
+#logo {
+  display: block;
+  margin: 0 auto;
+  padding: 10px 0 10px 0;
+  height: 100px;
+  width: 50%;
+  max-width: 480px;
+}
+
+#language {
+  display: block;
+  margin: auto;
+  min-height: 70px;
+  width: 50%;
+  max-width: 480px;
+}
+
+#translate {
+  display: block;
+  margin: auto;
+  min-height: 70px;
+  width: 50%;
+  max-width: 480px;
+}
+
+#stats {
+  display: block;
+  margin: auto;
+  min-height: 70px;
+  width: 50%;
+  max-width: 480px;
+}
+
+#books {
+  display: block;
+  margin: auto;
+  min-height: 70px;
+  width: 50%;
+  max-width: 480px;
+}
+
+#chapters {
+  display: block;
+  margin: auto;
+  min-height: 70px;
+  width: 50%;
+  max-width: 480px;
 }
