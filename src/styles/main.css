@@ -26,6 +26,18 @@ select {
   background: url(arrowdown.svg) 96% / 15% no-repeat #fdf23e;
 }
 
+input[type=text] {
+  margin: 17px 0 17px 0;
+  background-color: #2fce03;
+  width: 100%;
+  min-width: 100px;
+  height: 40px;
+  font-size: 20px;
+  text-align: center;
+  border: none;
+  border-bottom: 1px solid #444;
+}
+
 .container {
   max-width: 960px;
   margin: 0 auto;

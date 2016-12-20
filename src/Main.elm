@@ -289,9 +289,17 @@ view model =
             ]
         , div [ class "row row-green" ]
             [ div [ id "translate" ]
-                [ h4 [] [ text (fromWord model) ]
+                [ h4 [ id "currentWord" ]
+                    [ case (isEmptyWord model.currentWord) of
+                        False ->
+                            text (fromWord model)
+
+                        True ->
+                            text "No wordlist selected"
+                    ]
                 , input
                     [ id "wordInput"
+                    , type_ "text"
                     , onInput Input
                     , value model.textInput
                     , case (isEmptyWord model.currentWord) of
