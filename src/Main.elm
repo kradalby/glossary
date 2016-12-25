@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Events exposing (..)
-import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected, for)
+import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected, for, href)
 import Http
 import Json.Encode
 import Json.Decode exposing (Decoder, int, string, list)
@@ -14,6 +14,7 @@ import String
 import String.Extra
 import Dom
 import Task
+import Date exposing (Date)
 
 
 main : Program Never Model Msg
@@ -93,6 +94,7 @@ type alias Model =
     , toLanguage : Language
     , textInput : String
     , lazy : Bool
+    , date : Maybe Date
     }
 
 
@@ -116,9 +118,10 @@ init =
             , toLanguage = Spanish
             , textInput = ""
             , lazy = False
+            , date = Nothing
             }
     in
-        model ! [ getBooks ]
+        model ! [ getBooks, now ]
 
 
 type Msg
@@ -136,6 +139,8 @@ type Msg
     | NewChapters (Result Http.Error (List Chapter))
     | GetWords Chapter
     | NewWords (Result Http.Error (List Word))
+    | SetDate Date
+    | FocusResult (Result Dom.Error ())
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -202,12 +207,18 @@ update msg model =
             ( model, Cmd.none )
 
         GetWords chapter ->
-            ( model, getWords chapter )
+            ( model, Cmd.batch [ getWords chapter, Dom.focus "wordInput" |> Task.attempt FocusResult ] )
 
         NewWords (Ok words) ->
             ( (nextWord { model | wordList = words, unAnswered = words }), Cmd.none )
 
         NewWords (Err _) ->
+            ( model, Cmd.none )
+
+        SetDate date ->
+            ( { model | date = Just date }, Cmd.none )
+
+        FocusResult result ->
             ( model, Cmd.none )
 
 
@@ -290,7 +301,7 @@ view model =
                 ]
             , div [ class "row row-green" ]
                 [ div [ id "translate" ]
-                    [ h3 [ id "currentWord" ]
+                    [ h2 [ id "currentWord" ]
                         [ case (isEmptyWord model.currentWord) of
                             False ->
                                 text (fromWord model)
@@ -320,7 +331,35 @@ view model =
                 [ viewBooks model.bookList ]
             , div [ class "row row-pink" ]
                 [ viewChapters model.chapterList ]
-            , footer [ class "row footer" ] []
+            , viewFooter model
+            ]
+        ]
+
+
+now : Cmd Msg
+now =
+    Task.perform SetDate Date.now
+
+
+viewFooter : Model -> Html Msg
+viewFooter model =
+    footer [ class "row footer" ]
+        [ p [] [ text "Made with ", a [ href "http://elm-lang.org" ] [ text "Elm" ] ]
+        , p []
+            [ text
+                ("Copyright "
+                    ++ (toString
+                            (case model.date of
+                                Nothing ->
+                                    1337
+
+                                Just date ->
+                                    Date.year date
+                            )
+                       )
+                    ++ " "
+                )
+            , a [ href "https://kradalby.no" ] [ text "Kristoffer Dalby" ]
             ]
         ]
 
@@ -328,10 +367,10 @@ view model =
 viewSessionInformation : Model -> Html Msg
 viewSessionInformation model =
     div [ id "stats" ]
-        [ h4 [] [ text ("Correct: " ++ (toString (List.length model.correct))) ]
-        , h4 [] [ text ("Wrong: " ++ (toString (List.length model.wrong))) ]
-        , h4 [] [ text ("Left: " ++ (toString (List.length model.unAnswered))) ]
-        , h4 [] [ text ("Total: " ++ (toString (List.length model.wordList))) ]
+        [ h5 [] [ text ("Correct: " ++ (toString (List.length model.correct))) ]
+        , h5 [] [ text ("Wrong: " ++ (toString (List.length model.wrong))) ]
+        , h5 [] [ text ("Left: " ++ (toString (List.length model.unAnswered))) ]
+        , h5 [] [ text ("Total: " ++ (toString (List.length model.wordList))) ]
         ]
 
 

@@ -13,7 +13,9 @@ img {
 
 select {
   background: transparent;
-  width: 150px;
+  min-width: 120px;
+  width: 33%;
+  max-width: 200px;
   padding: 5px 35px 5px 5px;
   font-size: 16px;
   border: none;
@@ -38,6 +40,11 @@ input[type=text] {
   border-bottom: 1px solid #444;
 }
 
+h2 {
+  padding-top: 5px;
+  font-size: 28px;
+}
+
 h3 {
   padding-top: 5px;
   font-size: 24px;
@@ -45,6 +52,18 @@ h3 {
 
 h4 {
   font-size: 20px;
+}
+
+h5 {
+  font-size: 16px;
+}
+
+a {
+  color: #222;
+}
+
+a:visited {
+  color: #444;
 }
 
 .wrapper {
@@ -84,6 +103,8 @@ h4 {
 
 footer {
   background-color: #f1f1f1;
+  text-align: center;
+  padding-top: 10px;
 }
 
 #logo {
@@ -91,7 +112,12 @@ footer {
   align-items: center;
   justify-content: center;
   padding: 10px 0 10px 0;
-  height: 93px;
+  width: 100%;
+}
+
+#logo img {
+  width: 100%;
+  max-width: 480px;
 }
 
 #language {
