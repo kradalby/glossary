@@ -7,11 +7,11 @@ body {
 }
 
 img {
+  display: inline-block;
   height: 100%;
 }
 
 select {
-  margin-top: 17px;
   background: transparent;
   width: 150px;
   padding: 5px 35px 5px 5px;
@@ -29,7 +29,7 @@ select {
 input[type=text] {
   margin: 17px 0 17px 0;
   background-color: #2fce03;
-  width: 100%;
+  width: 96%;
   min-width: 100px;
   height: 40px;
   font-size: 20px;
@@ -38,15 +38,24 @@ input[type=text] {
   border-bottom: 1px solid #444;
 }
 
-.container {
+h3 {
+  padding-top: 5px;
+  font-size: 24px;
+}
+
+h4 {
+  font-size: 20px;
+}
+
+.wrapper {
+  width: 100%;
   max-width: 960px;
   margin: 0 auto;
 }
 
-.row {
-  margin: 0;
-  padding: 0;
-  width: 100%;
+.container {
+  display: flex;
+  flex-direction: column;
 }
 
 .row-white {
@@ -78,50 +87,66 @@ footer {
 }
 
 #logo {
-  display: block;
-  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 10px 0 10px 0;
   height: 93px;
-  width: 50%;
-  max-width: 480px;
 }
 
 #language {
-  display: block;
-  margin: auto;
-  min-height: 70px;
-  width: 50%;
-  max-width: 480px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 60px;
 }
 
 #translate {
-  display: block;
-  margin: auto;
-  min-height: 70px;
-  width: 50%;
-  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  height: 200px;
 }
 
 #stats {
-  display: block;
-  margin: auto;
-  min-height: 70px;
-  width: 50%;
-  max-width: 480px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 60px;
 }
 
 #books {
-  display: block;
-  margin: auto;
-  min-height: 70px;
-  width: 50%;
-  max-width: 480px;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+}
+
+.book {
+  display: inline-block;
+  width: 120px;
+  height: 100px;
+  border: 1px solid #666;
+  border-radius: 5px;
+  margin: 10px;
 }
 
 #chapters {
-  display: block;
-  margin: auto;
-  min-height: 70px;
-  width: 50%;
-  max-width: 480px;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+}
+
+.chapter {
+  display: inline-block;
+  width: 120px;
+  border: 1px solid #666;
+  border-radius: 5px;
+  margin: 10px;
 }

@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Events exposing (..)
-import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected)
+import Html.Attributes exposing (type_, checked, name, disabled, value, class, src, id, selected, for)
 import Http
 import Json.Encode
 import Json.Decode exposing (Decoder, int, string, list)
@@ -270,55 +270,58 @@ targetValueLanguageDecoder =
 
 view : Model -> Html Msg
 view model =
-    div [ class "container" ]
-        [ div [ class "row row-white" ] [ div [ id "logo" ] [ img [ src "assets/glossary_logo.svg" ] [] ] ]
-        , div [ class "row row-yellow" ]
-            [ div [ id "language" ]
-                [ select [ name "fromLanguage", on "change" (Json.Decode.map ChangeFromLanguage targetValueLanguageDecoder) ]
-                    (List.map
-                        (\language -> languageOption (toString language) (language == model.fromLanguage))
-                        availableLanguages
-                    )
-                , i [ class "fa fa-long-arrow-right fa-2" ] []
-                , select [ name "toLanguage", on "change" (Json.Decode.map ChangeToLanguage targetValueLanguageDecoder) ]
-                    (List.map
-                        (\language -> languageOption (toString language) (language == model.toLanguage))
-                        availableLanguages
-                    )
-                ]
-            ]
-        , div [ class "row row-green" ]
-            [ div [ id "translate" ]
-                [ h4 [ id "currentWord" ]
-                    [ case (isEmptyWord model.currentWord) of
-                        False ->
-                            text (fromWord model)
-
-                        True ->
-                            text "No wordlist selected"
+    div [ class "wrapper" ]
+        [ div [ class "container" ]
+            [ div [ class "row row-white" ] [ div [ id "logo" ] [ img [ src "assets/glossary_logo.svg" ] [] ] ]
+            , div [ class "row row-yellow" ]
+                [ div [ id "language" ]
+                    [ select [ name "fromLanguage", on "change" (Json.Decode.map ChangeFromLanguage targetValueLanguageDecoder) ]
+                        (List.map
+                            (\language -> languageOption (toString language) (language == model.fromLanguage))
+                            availableLanguages
+                        )
+                    , i [ class "fa fa-long-arrow-right fa-2" ] []
+                    , select [ name "toLanguage", on "change" (Json.Decode.map ChangeToLanguage targetValueLanguageDecoder) ]
+                        (List.map
+                            (\language -> languageOption (toString language) (language == model.toLanguage))
+                            availableLanguages
+                        )
                     ]
-                , input
-                    [ id "wordInput"
-                    , type_ "text"
-                    , onInput Input
-                    , value model.textInput
-                    , case (isEmptyWord model.currentWord) of
-                        False ->
-                            onEnter (checkInputWord model)
-
-                        True ->
-                            disabled True
-                    ]
-                    []
-                , label [] [ text "Lazy", input [ type_ "checkbox", onClick (ToggleLazy), checked model.lazy ] [] ]
                 ]
+            , div [ class "row row-green" ]
+                [ div [ id "translate" ]
+                    [ h3 [ id "currentWord" ]
+                        [ case (isEmptyWord model.currentWord) of
+                            False ->
+                                text (fromWord model)
+
+                            True ->
+                                text "No wordlist selected"
+                        ]
+                    , input
+                        [ id "wordInput"
+                        , type_ "text"
+                        , onInput Input
+                        , value model.textInput
+                        , case (isEmptyWord model.currentWord) of
+                            False ->
+                                onEnter (checkInputWord model)
+
+                            True ->
+                                disabled True
+                        ]
+                        []
+                    , div [] [ input [ type_ "checkbox", onClick (ToggleLazy), checked model.lazy, id "lazy", name "lazy" ] [], label [ for "lazy" ] [ text "Lazy" ] ]
+                    ]
+                ]
+            , div [ class "row row-orange" ]
+                [ viewSessionInformation model ]
+            , div [ class "row row-light-pink" ]
+                [ viewBooks model.bookList ]
+            , div [ class "row row-pink" ]
+                [ viewChapters model.chapterList ]
+            , footer [ class "row footer" ] []
             ]
-        , div [ class "row row-orange" ]
-            [ viewSessionInformation model ]
-        , div [ class "row row-light-pink" ]
-            [ viewBooks model.bookList ]
-        , div [ class "row row-pink" ]
-            [ viewChapters model.chapterList ]
         ]
 
 
@@ -372,7 +375,7 @@ viewChapters chapters =
 viewChapter : Chapter -> Html Msg
 viewChapter chapter =
     div [ class "chapter", onClick (GetWords chapter) ]
-        [ h4 [] [ text (toString chapter.chapter) ]
+        [ h4 [] [ text ("Chapter " ++ toString chapter.chapter) ]
         ]
 
 
