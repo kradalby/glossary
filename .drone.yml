@@ -13,6 +13,7 @@ pipeline:
     image: drillster/drone-rsync
     user: www
     hosts: [ "seel.terra.fap.no" ]
+    key: ${SSH_KEY}
     port: 22
     source: dist/
     target: /usr/local/www/glossary.kradalby.no/
