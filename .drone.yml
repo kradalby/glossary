@@ -12,7 +12,7 @@ pipeline:
   deploy:
     image: drillster/drone-rsync
     user: www
-    host: [ "seel.terra.fap.no" ]
+    hosts: [ "seel.terra.fap.no" ]
     port: 22
     source: dist/
     target: /usr/local/www/glossary.kradalby.no/
