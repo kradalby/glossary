@@ -19,5 +19,9 @@ install: ;@echo "-- Installing dependencies"
 	elm package install
 	npm i
 
+deinstall: ;@echo "-- Removing dependencies"
+	rm -rf elm-stuff/
+	rm -rf node_modules/
+
 watch: ;@echo "-- watching files"
 	npm run watch
