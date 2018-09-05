@@ -13,7 +13,7 @@ pipeline:
     deployment: glossary-deployment
     repo: kradalby/glossary
     container: glossary-container
-    namespace: glossary
+    namespace: default
     secrets: [ kubernetes_server, kubernetes_cert, kubernetes_token ]
     tag:
       - ${DRONE_COMMIT_SHA:0:8}
