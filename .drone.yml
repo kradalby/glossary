@@ -15,11 +15,11 @@ steps:
     tags:
     - ${DRONE_COMMIT_SHA:0:8}
     - latest
-  environment:
-    DOCKER_PASSWORD:
-      from_secret: docker_password
-    DOCKER_USERNAME:
+    cache: true
+    username:
       from_secret: docker_username
+    password:
+      from_secret: docker_password
 
 - name: deploy
   pull: if-not-exists
