@@ -24,7 +24,7 @@
   "devDependencies": {
     "copy-webpack-plugin": "^4.0.1",
     "css-loader": "^0.26.1",
-    "elm-webpack-loader": "^4.2.0",
+    "elm-webpack-loader": "^8.0.0",
     "file-loader": "^0.10.0",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
